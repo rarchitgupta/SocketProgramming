@@ -5,16 +5,16 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <stdio.h>
+
 int main()
 {
-    int s, r, recarr, recsize, recchoice, sntb, x, ns, a = 0;
+    int s, r, recb, sntb, x, ns, a = 0;
     printf("INPUT port number: ");
     scanf("%d", &x);
     socklen_t len;
     struct sockaddr_in server, client;
-    int buff[50];
-    int n;
-    char choice;
+    char buff[50];
+
     s = socket(AF_INET, SOCK_STREAM, 0);
     if (s == -1)
     {
@@ -22,69 +22,138 @@ int main()
         exit(0);
     }
     printf("\nSocket created.");
+
     server.sin_family = AF_INET;
     server.sin_port = htons(x);
     server.sin_addr.s_addr = htonl(INADDR_ANY);
+
     r = bind(s, (struct sockaddr *)&server, sizeof(server));
     if (r == -1)
     {
         printf("\nBinding error.");
         exit(0);
     }
-    printf("\nSocket Binded.");
+    printf("\nSocket binded.");
+
     r = listen(s, 1);
     if (r == -1)
     {
         close(s);
         exit(0);
     }
-    printf("\nSocket Listening.");
+    printf("\nSocket listening.");
+
     len = sizeof(client);
+
     ns = accept(s, (struct sockaddr *)&client, &len);
     if (ns == -1)
     {
         close(s);
         exit(0);
     }
-    printf("\nSocket Accepting.");
-    recsize = recv(ns, n, sizeof(n), 0);
-    if (recsize == -1)
+    printf("\nSocket accepting.");
+    char arr[50];
+    int arr1[50], arr2[50];
+    recb = recv(ns, arr, sizeof(arr), 0);
+    if (recb == -1)
     {
-        printf("\nSize Recieving Failed");
+        printf("\nMessage Recieving Failed");
         close(s);
         close(ns);
         exit(0);
     }
-    recarr = recv(ns, buff, sizeof(buff), 0);
-    if (recarr == -1)
+    printf("\n\nArray of numbers received!\n");
+    int ch = 1, n, num = 1;
+    while (ch != 5)
     {
-        printf("\nArray Recieving Failed");
-        close(s);
-        close(ns);
-        exit(0);
-    }
-    recchoice = recv(ns, choice, sizeof(choice), 0);
-    if (recchoice == -1)
-    {
-        printf("\nArray Recieving Failed");
-        close(s);
-        close(ns);
-        exit(0);
-    }
-    printf("Size of Array: %d", n);
-    printf("Array: \n");
-    for (int i = 0; i < n; i++)
-        printf("%d ", buff[i]);
-    printf("\n");
-    printf("Choice: %c", &choice);
-    scanf("%s", buff);
-    sntb = send(ns, buff, sizeof(buff), 0);
-    if (sntb == -1)
-    {
-        printf("\nMessage Sending Failed");
-        close(s);
-        close(ns);
-        exit(0);
+        recb = recv(ns, buff, sizeof(buff), 0);
+        if (recb == -1)
+        {
+            printf("\nMessage Recieving Failed");
+            close(s);
+            close(ns);
+            exit(0);
+        }
+        n = buff[0];
+        ch = buff[1];
+        if (ch != 5)
+            printf("\nProcessing request..\n");
+        int l = 0, k = 0, x;
+        switch (ch)
+        {
+        case 1:
+            num = buff[2];
+            for (x = 0; x < n; x++)
+            {
+                if (arr[x] == num)
+                    break;
+            }
+            printf("\nProcessing done!");
+            if (x == n)
+                printf("\nElement does not exist!");
+            else
+                printf("\nElement exists at %d position.", x + 1);
+            printf("\n\n");
+            break;
+        case 2:
+            for (int i = 0; i < n - 1; i++)
+            {
+                for (int j = 0; j < n - i - 1; j++)
+                {
+                    if (arr[j] > arr[j + 1])
+                    {
+                        int temp = arr[j];
+                        arr[j] = arr[j + 1];
+                        arr[j + 1] = temp;
+                    }
+                }
+            }
+            printf("\nProcessing done!");
+            printf("\nSorted array is: \n");
+            for (int i = 0; i < n; i++)
+                printf("%d  ", arr[i]);
+            printf("\n\n");
+            break;
+        case 3:
+            for (int i = 0; i < n - 1; i++)
+            {
+                for (int j = 0; j < n - i - 1; j++)
+                {
+                    if (arr[j] < arr[j + 1])
+                    {
+                        int temp = arr[j];
+                        arr[j] = arr[j + 1];
+                        arr[j + 1] = temp;
+                    }
+                }
+            }
+            printf("\nProcessing done!");
+            printf("\nSorted array is: \n");
+            for (int i = 0; i < n; i++)
+                printf("%d  ", arr[i]);
+            printf("\n\n");
+            break;
+        case 4:
+            printf("\nProcessing done!");
+            printf("\nEven array is: \n");
+            for (int i = 0; i < n; i++)
+            {
+                if (arr[i] % 2 == 0)
+                    printf("%d ", arr[i]);
+            }
+            printf("\n\nOdd array is: \n");
+            for (int i = 0; i < n; i++)
+            {
+                if (arr[i] % 2 != 0)
+                    printf("%d ", arr[i]);
+            }
+            printf("\n\n");
+            break;
+        case 5:
+            break;
+        default:
+            break;
+        }
     }
     close(ns);
     close(s);
